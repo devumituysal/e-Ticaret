@@ -11,4 +11,8 @@
     <Folder Include="wwwroot\theme\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\App.Data\App.Data.csproj" />
+  </ItemGroup>
+
 </Project>

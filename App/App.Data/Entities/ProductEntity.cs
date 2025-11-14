@@ -16,7 +16,7 @@ namespace App.Data.Entities
         public byte StockAmount {  get; set; }
         public bool Enabled { get; set; } = true;
 
-        public UserEntity User { get; set; } = null!;
+        public UserEntity Seller { get; set; } = null!;
         public CategoryEntity Category { get; set; } = null!;
 
 

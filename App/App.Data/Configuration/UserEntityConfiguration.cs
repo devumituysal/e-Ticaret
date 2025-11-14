@@ -31,9 +31,11 @@ namespace App.Data.Configuration
                 .HasDefaultValue(true);
             builder.Property(u => u.CreatedAt)
                 .IsRequired();
+
             builder.HasOne(u => u.Role)
                 .WithMany()
-                .HasForeignKey(u => u.RoleId);
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

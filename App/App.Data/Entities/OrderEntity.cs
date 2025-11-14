@@ -8,7 +8,7 @@ namespace App.Data.Entities
 {
     public class OrderEntity : BaseEntity
     {
-        public int UserId { get; set; }
+        public int UserId { get; set; } 
         public string OrderCode { get; set; } = null!;
         public string Address { get; set; } = null!;
 

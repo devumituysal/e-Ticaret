@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace App.Data.Configuration
 {
-    internal class RoleEntitiyConfiguration : IEntityTypeConfiguration<RoleEntity>
+    internal class RoleEntityConfiguration : IEntityTypeConfiguration<RoleEntity>
     {
         public void Configure(EntityTypeBuilder<RoleEntity> builder)
         {
