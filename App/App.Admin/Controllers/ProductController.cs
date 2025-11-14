@@ -6,14 +6,14 @@ namespace App.Admin.Controllers
     {
         [Route("/products/")]
         [HttpGet]
-        public IActionResult List()
+        public IActionResult List()   // admin ürünler listesini görür
         {
             return View();
         }
 
         [Route("/products/filter")]
         [HttpGet]
-        public IActionResult Filter([FromQuery] object filterOptions)
+        public IActionResult Filter([FromQuery] object filterOptions)          // ürünleri filtreler??? 
         {
             // will return filtered products as json
             return Json(new { });
@@ -21,7 +21,7 @@ namespace App.Admin.Controllers
 
         [Route("/products/{productId:int}/delete")]
         [HttpGet]
-        public IActionResult Delete([FromRoute] int productId)
+        public IActionResult Delete([FromRoute] int productId)  // admin mevcut ürün yanındaki butona basarak ürün siler
         {
             return View();
         }

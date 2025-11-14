@@ -6,14 +6,14 @@ namespace App.Admin.Controllers
     {
         [Route("/users")]
         [HttpGet]
-        public IActionResult List()
+        public IActionResult List() // admin kullanıcıları listeler
         {
             return View();
         }
 
         [Route("/users/{userId:int}/approve")]
         [HttpGet]
-        public IActionResult Approve([FromRoute] int userId)
+        public IActionResult Approve([FromRoute] int userId)   // admin kullanıcının seller olma isteğini onaylar
         {
             return View();
         }

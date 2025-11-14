@@ -7,12 +7,12 @@ namespace App.Admin.Controllers
     {
         [Route("/login")]
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login()      //login butonu ile admin login formunu açar
         {
             return View();
         }
 
-        [Route("/login")]
+        [Route("/login")]                 //admin login formu doldurularak admin girişi yapılır
         [HttpPost]
         public IActionResult Login([FromForm] LoginViewModel loginModel)
         {
@@ -21,7 +21,7 @@ namespace App.Admin.Controllers
 
         [Route("/logout")]
         [HttpGet]
-        public IActionResult Logout()
+        public IActionResult Logout()         //logout butonuna basılınca admin logout olur
         {
             // logout kodları...
 

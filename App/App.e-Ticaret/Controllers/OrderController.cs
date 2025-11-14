@@ -6,7 +6,7 @@ namespace App.e_Ticaret.Controllers
     {
         [Route("/order")]
         [HttpPost]
-        public IActionResult Create()
+        public IActionResult Create() // sepeti onayla butonu ile çalışır
         {
             // create order...
             var orderId = 1;
@@ -15,7 +15,7 @@ namespace App.e_Ticaret.Controllers
 
         [Route("/order/{orderId:int}/details")]
         [HttpGet]
-        public IActionResult Details([FromRoute] int orderId)
+        public IActionResult Details([FromRoute] int orderId) // sipariş detaylarını gösterir
         {
             return View();
         }

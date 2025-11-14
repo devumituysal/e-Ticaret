@@ -6,28 +6,28 @@ namespace App.e_Ticaret.Controllers
     {
         [Route("/profile")]
         [HttpGet]
-        public IActionResult Details()
+        public IActionResult Details() // kullanıcı kendi profil sayfasını görür
         {
             return View();
         }
 
         [Route("/profile")]
         [HttpPost]
-        public IActionResult Edit([FromForm] object editMyProfileModel)
+        public IActionResult Edit([FromForm] object editMyProfileModel) // kullanıcı kendi sayfasını günceller
         {
             return RedirectToAction(nameof(Details));
         }
 
         [Route("/my-orders")]
         [HttpGet]
-        public IActionResult MyOrders()
+        public IActionResult MyOrders() // geçmiş siparişleri gösterir
         {
             return View();
         }
 
         [Route("/my-products")]
         [HttpGet]
-        public IActionResult MyProducts()
+        public IActionResult MyProducts() // satıcı ise mevcut ürünlerini gösterir
         {
             return View();
         }

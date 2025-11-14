@@ -6,7 +6,7 @@ namespace App.Eticaret.Controllers
     {
         [Route("/add-to-cart/{productId:int}")]
         [HttpGet]
-        public IActionResult AddProduct([FromRoute] int productId)
+        public IActionResult AddProduct([FromRoute] int productId)  // ürün üzerindeki buton ile sepete ürünü ekleme işini yapar
         {
             // add 1 product...
 
@@ -21,13 +21,13 @@ namespace App.Eticaret.Controllers
         }
         [Route("/cart")]
         [HttpGet]
-        public IActionResult Edit()
+        public IActionResult Edit() // mevcut sepeti gösterir
         {
             return View();
         }
         [Route("/cart")]
         [HttpPost]
-        public IActionResult Edit([FromForm] object editCartModel)
+        public IActionResult Edit([FromForm] object editCartModel) // sepet üzerindeki ürünleri düzenleme işini yapar ( ürün sil , ürün adedi arttır azalt vs)
         {
             return View();
         }
