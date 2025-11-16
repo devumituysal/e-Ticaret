@@ -1,9 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.e_Ticaret.Controllers
 {
     public class OrderController : Controller
     {
+
+        private readonly ApplicationDbContext _dbContext;
+
+        public OrderController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         [Route("/order")]
         [HttpPost]
         public IActionResult Create() // sepeti onayla butonu ile çalışır

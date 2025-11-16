@@ -1,9 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.Admin.Controllers
 {
     public class ProductController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public ProductController(ApplicationDbContext dbContext)
+        {
+            _dbContext=dbContext;   
+        }
+
         [Route("/products/")]
         [HttpGet]
         public IActionResult List()   // admin ürünler listesini görür

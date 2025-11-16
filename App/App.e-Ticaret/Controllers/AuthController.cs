@@ -1,4 +1,5 @@
-﻿using App.e_Ticaret.Models.ViewModels;
+﻿using App.Data.Contexts;
+using App.e_Ticaret.Models.ViewModels;
 using App.Eticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,13 @@ namespace App.e_Ticaret.Controllers
 {
     public class AuthController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public AuthController(ApplicationDbContext dbContext)
+        {
+            _dbContext=dbContext;   
+        }
+
         [Route("/register")]
         [HttpGet]
         public IActionResult Register()  // kullanıcı kayıt formunu açar

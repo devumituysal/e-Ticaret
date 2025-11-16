@@ -1,9 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.e_Ticaret.Controllers
 {
     public class ProductController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public ProductController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+
         [Route("/product")]
         [HttpGet]
         public IActionResult Create() // yeni bir ürün ekleme formunu açar ( muhtemel senaryo sadece satıcılar için)
@@ -45,7 +54,7 @@ namespace App.e_Ticaret.Controllers
         {
             // save product comment...
 
-            return RedirectToAction(nameof(HomeController.ProductDetail), "Home", new { productId }); 
+            return RedirectToAction(nameof(HomeController.ProductDetailAsync), "Home", new { productId }); 
         }
     }
 }

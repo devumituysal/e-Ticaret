@@ -23,6 +23,8 @@ namespace App.Data.Contexts
         public DbSet<ProductImageEntity> ProductImages { get; set; }
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<ContactFormEntity> ContactForms { get; set; }
+        public DbSet<DiscountEntity> ProductDiscounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +37,8 @@ namespace App.Data.Contexts
             modelBuilder.ApplyConfiguration(new ProductImageEntityConfiguration());
             modelBuilder.ApplyConfiguration(new RoleEntityConfiguration());
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new ContactFormEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new DiscountEntityConfiguration());
 
             modelBuilder.Entity<RoleEntity>().HasData(
                 new RoleEntity() { Id = 1, Name = "admin", CreatedAt = DateTime.UtcNow },

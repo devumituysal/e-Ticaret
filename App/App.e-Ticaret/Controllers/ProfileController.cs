@@ -1,9 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.e_Ticaret.Controllers
 {
     public class ProfileController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public ProfileController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         [Route("/profile")]
         [HttpGet]
         public IActionResult Details() // kullanıcı kendi profil sayfasını görür

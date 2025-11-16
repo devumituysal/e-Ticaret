@@ -34,12 +34,17 @@ namespace App.Data.Configuration
             builder.Property(p => p.Enabled)
                 .IsRequired()
                 .HasDefaultValue(true);
+
+
             builder.HasOne(p => p.Seller)
                 .WithMany()
-                .HasForeignKey(p => p.SellerId);
+                .HasForeignKey(p => p.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(p => p.Category)
                 .WithMany()
-                .HasForeignKey(p => p.CategoryId);
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

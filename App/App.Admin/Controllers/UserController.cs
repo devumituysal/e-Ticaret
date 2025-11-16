@@ -1,9 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.Admin.Controllers
 {
     public class UserController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public UserController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         [Route("/users")]
         [HttpGet]
         public IActionResult List() // admin kullanıcıları listeler

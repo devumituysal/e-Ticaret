@@ -1,9 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using App.Data.Contexts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.Eticaret.Controllers
 {
     public class CartController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public CartController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         [Route("/add-to-cart/{productId:int}")]
         [HttpGet]
         public IActionResult AddProduct([FromRoute] int productId)  // ürün üzerindeki buton ile sepete ürünü ekleme işini yapar
