@@ -1,5 +1,8 @@
 ﻿using App.Data.Contexts;
+using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace App.e_Ticaret.Controllers
 {
@@ -15,15 +18,39 @@ namespace App.e_Ticaret.Controllers
 
         [Route("/product")]
         [HttpGet]
-        public IActionResult Create() // yeni bir ürün ekleme formunu açar ( muhtemel senaryo sadece satıcılar için)
+        public async Task<IActionResult> Create() // yeni bir ürün ekleme formunu açar ( muhtemel senaryo sadece satıcılar için)
         {
+            ViewBag.Discounts = await _dbContext.ProductDiscounts
+                .Where(d=>d.Enabled)
+                .Select(d=> new DiscountSelectItemViewModel { Id = d.Id, Rate = d.DiscountRate })
+                .ToListAsync();
+
+            ViewBag.Categories = await _dbContext.Categories
+                .Select(d => new CategorySelectItemViewModel { Id = d.Id , Name = d.Name})
+                .ToListAsync();
             return View();
         }
 
         [Route("/product")]
         [HttpPost]
-        public IActionResult Create([FromForm] object newProductModel) // form doldurularak yeni ürün ekleme işini yapar
+        public async Task<IActionResult> CreateAsync([FromForm] EditProductViewModel newProductModel) // form doldurularak yeni ürün ekleme işini yapar
         {
+            ViewBag.Discounts = await _dbContext.ProductDiscounts
+                 .Where(d => d.Enabled)
+                 .Select(d => new DiscountSelectItemViewModel { Id = d.Id, Rate = d.DiscountRate })
+                 .ToListAsync();
+
+            ViewBag.Categories = await _dbContext.Categories
+                .Select(c => new CategorySelectItemViewModel { Id = c.Id, Name = c.Name })
+                .ToListAsync();
+
+            if (!ModelState.IsValid)
+            {
+                return View(newProductModel);
+            }
+
+            // TODO: save new product...
+
             return View();
         }
 
