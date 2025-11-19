@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="zxx">
+<html lang="en">
 
 <head>
     <partial name="Partials/PageHead.cshtml" />
@@ -21,7 +21,7 @@
     <partial name="Partials/Footer.cshtml" />
     <partial name="Partials/PageScripts.cshtml" />
 
-
+    @await RenderSectionAsync("Scripts", required: false)
 
 
 </body>

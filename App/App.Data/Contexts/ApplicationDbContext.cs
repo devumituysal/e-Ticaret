@@ -25,6 +25,8 @@ namespace App.Data.Contexts
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<ContactFormEntity> ContactForms { get; set; }
         public DbSet<DiscountEntity> ProductDiscounts { get; set; }
+        public DbSet<BlogEntity> Blogs { get; set; }
+        public DbSet<BlogCommentEntity> BlogsComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,6 +41,8 @@ namespace App.Data.Contexts
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ContactFormEntityConfiguration());
             modelBuilder.ApplyConfiguration(new DiscountEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new BlogEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new BlogCommentEntityConfiguration());
 
             modelBuilder.Entity<RoleEntity>().HasData(
                 new RoleEntity() { Id = 1, Name = "admin", CreatedAt = DateTime.UtcNow },

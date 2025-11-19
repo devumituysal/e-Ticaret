@@ -1,4 +1,4 @@
-﻿namespace App.Eticaret.Models.ViewModels
+﻿namespace App.e_Ticaret.Models.ViewModels
 {
     public class LoginViewModel
     {
