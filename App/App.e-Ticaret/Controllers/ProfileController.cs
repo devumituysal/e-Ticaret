@@ -1,9 +1,11 @@
 ﻿using App.Data.Contexts;
+using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.e_Ticaret.Controllers
 {
-    public class ProfileController : Controller
+    public class ProfileController : BaseController
     {
         private readonly ApplicationDbContext _dbContext;
 
@@ -14,30 +16,137 @@ namespace App.e_Ticaret.Controllers
 
         [Route("/profile")]
         [HttpGet]
-        public IActionResult Details() // kullanıcı kendi profil sayfasını görür
+        public async Task<IActionResult> DetailsAsync() // kullanıcı kendi profil sayfasını görür
         {
-            return View();
+            var userId = GetUserId();
+
+            if (userId is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var userViewModel = await _dbContext.Users
+                .Where(u => u.Id == userId.Value)
+                .Select(u => new ProfileDetailsViewModel
+                {
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+
+                })
+                .FirstOrDefaultAsync();
+
+            if (userViewModel is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            string? previousSuccessMessage = TempData["SuccessMessage"]?.ToString();
+
+            if (previousSuccessMessage is not null)
+            {
+                SetSuccessMessage(previousSuccessMessage);
+            }
+
+            return View(userViewModel);
         }
 
         [Route("/profile")]
         [HttpPost]
-        public IActionResult Edit([FromForm] object editMyProfileModel) // kullanıcı kendi sayfasını günceller
+        public async Task<IActionResult> EditAsync([FromForm] ProfileDetailsViewModel editMyProfileModel) // kullanıcı kendi sayfasını günceller
         {
-            return RedirectToAction(nameof(Details));
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var user = await GetCurrentUserAsync();
+
+            if (user is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(editMyProfileModel);
+            }
+
+            user.FirstName = editMyProfileModel.FirstName;
+            user.LastName = editMyProfileModel.LastName;
+
+            if (!string.IsNullOrWhiteSpace(editMyProfileModel.Password) && editMyProfileModel.Password != "******")
+            {
+                user.Password = editMyProfileModel.Password;
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Profiliniz başarıyla güncellendi.";
+
+            return RedirectToAction(nameof(DetailsAsync));
         }
 
         [Route("/my-orders")]
         [HttpGet]
-        public IActionResult MyOrders() // geçmiş siparişleri gösterir
+        public async Task<IActionResult> MyOrdersAsync() // geçmiş siparişleri gösterir
         {
-            return View();
+            var userId = GetUserId();
+
+            if (userId is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            List<OrderViewModel> orders = await _dbContext.Orders
+                .Where(o => o.UserId == userId.Value)
+                .Select(o => new OrderViewModel
+                {
+                    OrderCode = o.OrderCode,
+                    Address = o.Address,
+                    CreatedAt = o.CreatedAt,
+                    TotalPrice = o.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity),
+                    TotalProducts = o.OrderItems.Count,
+                    TotalQuantity = o.OrderItems.Sum(oi => oi.Quantity),
+                })
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            return View(orders);
         }
 
         [Route("/my-products")]
         [HttpGet]
-        public IActionResult MyProducts() // satıcı ise mevcut ürünlerini gösterir
+        public async Task<IActionResult> MyProductsAsync() // satıcı ise mevcut ürünlerini gösterir
         {
-            return View();
+            var userId = GetUserId();
+
+            if (userId is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (!await IsUserSellerAsync())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            List<MyProductsViewModel> products = await _dbContext.Products
+                .Where(p => p.SellerId == userId.Value)
+                .Select(p => new MyProductsViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Description = p.Details,
+                    Stock = p.StockAmount,
+                    HasDiscount = p.DiscountId != null,
+                    CreatedAt = p.CreatedAt,
+                })
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            return View(products);
         }
     }
 }

@@ -13,6 +13,6 @@ namespace App.Data.Entities
         public string Address { get; set; } = null!;
 
         public UserEntity User { get; set; } = null!;
-
+        public ICollection<OrderItemEntity> OrderItems { get; set; } = [];
     }
 }

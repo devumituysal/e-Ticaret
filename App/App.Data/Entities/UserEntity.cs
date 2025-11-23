@@ -18,6 +18,8 @@ namespace App.Data.Entities
         public int RoleId { get; set; }
         public bool Enabled { get; set; } = true;
 
+        public bool HasSellerRequest { get; set; } = false;
+
         public RoleEntity Role { get; set; } = null!;
     }
 }

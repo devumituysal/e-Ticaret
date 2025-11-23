@@ -2,7 +2,7 @@
 
 namespace App.e_Ticaret.Models.ViewModels
 {
-    public class RegisterViewModel
+    public class ProfileDetailsViewModel
     {
         [Required, MaxLength(50)]
         public string FirstName { get; set; } = null!;
@@ -12,11 +12,6 @@ namespace App.e_Ticaret.Models.ViewModels
 
         [Required, MaxLength(256), EmailAddress]
         public string Email { get; set; } = null!;
-
-        [Required, MinLength(4), DataType(DataType.Password)]
-        public string Password { get; set; } = null!;
-
-        [Required, MinLength(4), DataType(DataType.Password), Compare(nameof(Password))]
-        public string PasswordConfirm { get; set; } = null!;
+        public string? Password { get; set; }
     }
 }
