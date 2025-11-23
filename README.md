@@ -1,2 +1,2 @@
 # e-Ticaret
-E-ticaret sistemi geliştirerek backend ve full-stack becerilerimi pekiştirdiğim proje
+A project where I reinforced my backend and full-stack skills by developing an e-commerce system.
