@@ -5,6 +5,8 @@ namespace App.e_Ticaret.Models.ViewModels
     public class EditProductViewModel
     {
         public int SellerId { get; set; }
+
+        [Required]
         public int CategoryId { get; set; }
         public int? DiscountId { get; set; }
 
@@ -19,5 +21,6 @@ namespace App.e_Ticaret.Models.ViewModels
 
         [Required, Range(1, 255)]
         public byte StockAmount { get; set; }
+        public IList<IFormFile> Images { get; set; } = [];
     }
 }

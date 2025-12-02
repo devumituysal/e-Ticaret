@@ -18,7 +18,7 @@ namespace App.Eticaret.Controllers
 
         [Route("/add-to-cart/{productId:int}")]
         [HttpGet]
-        public async Task<IActionResult> AddProductAsync([FromRoute] int productId)  // ürün üzerindeki buton ile sepete ürünü ekleme işini yapar
+        public async Task<IActionResult> AddProduct([FromRoute] int productId)  // ürün üzerindeki buton ile sepete ürünü ekleme işini yapar
         {
             var userId = GetUserId();
 
@@ -57,14 +57,14 @@ namespace App.Eticaret.Controllers
 
             if (prevUrl is null)
             {
-                return RedirectToAction(nameof(EditAsync));
+                return RedirectToAction(nameof(Edit));
             }
 
             return Redirect(prevUrl);
         }
         [Route("/cart")]
         [HttpGet]
-        public async Task<IActionResult> EditAsync() // mevcut sepeti gösterir
+        public async Task<IActionResult> Edit() // mevcut sepeti gösterir
         {
             var userId = GetUserId();
 
@@ -98,7 +98,7 @@ namespace App.Eticaret.Controllers
             _dbContext.CartItems.Remove(cartItem);
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToAction(nameof(EditAsync));
+            return RedirectToAction(nameof(Edit));
         }
 
         [HttpPost("/cart/update")]
