@@ -1,5 +1,6 @@
 ﻿using App.Data.Contexts;
 using App.Data.Entities;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Models.ViewModels;
 using App.Eticaret.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +10,15 @@ namespace App.e_Ticaret.Controllers
 {
     public class OrderController : BaseController
     {
+        private readonly IDataRepository<OrderEntity> _orRepo;
+        private readonly IDataRepository<OrderItemEntity> _oiRepo;
+        private readonly IDataRepository<CartItemEntity> _ciRepo;
 
-        private readonly ApplicationDbContext _dbContext;
-
-        public OrderController(ApplicationDbContext dbContext)
+        public OrderController(IDataRepository<OrderEntity> orRepo, IDataRepository<OrderItemEntity> oiRepo,IDataRepository<CartItemEntity> ciRepo)
         {
-            _dbContext = dbContext;
+            _orRepo = orRepo;
+            _oiRepo = oiRepo;
+            _ciRepo = ciRepo;
         }
 
         [Route("/order")]
@@ -34,14 +38,14 @@ namespace App.e_Ticaret.Controllers
                 return View(viewModel);
             }
 
-            var cartItems = await _dbContext.CartItems
+            var cartItems = await _ciRepo.GetAll()
                 .Include(ci => ci.Product)
                 .Where(ci => ci.UserId == userId)
                 .ToListAsync();
 
             if (cartItems.Count == 0)
             {
-                return RedirectToAction(nameof(CartController.EditAsync), "Cart");
+                return RedirectToAction(nameof(CartController.Edit), "Cart");
             }
 
             var order = new OrderEntity
@@ -52,8 +56,7 @@ namespace App.e_Ticaret.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            _dbContext.Orders.Add(order);
-            await _dbContext.SaveChangesAsync();
+            order = await _orRepo.AddAsync(order);
 
             foreach (var cartItem in cartItems)
             {
@@ -66,11 +69,10 @@ namespace App.e_Ticaret.Controllers
                     CreatedAt = DateTime.UtcNow,
                 };
 
-                _dbContext.OrderItems.Add(orderItem);
-                _dbContext.CartItems.Remove(cartItem);
+                await _oiRepo.AddAsync(orderItem);
             }
 
-            await _dbContext.SaveChangesAsync();
+           
 
             return RedirectToAction(nameof(DetailsAsync), new { orderCode = order.OrderCode });
         }
@@ -86,7 +88,7 @@ namespace App.e_Ticaret.Controllers
                 return RedirectToAction(nameof(AuthController.Login), "Auth");
             }
 
-            var order = await _dbContext.Orders
+            var order = await _orRepo.GetAll()
                 .Where(o => o.UserId == userId && o.OrderCode == orderCode)
                 .Select(o => new OrderDetailsViewModel
                 {
@@ -119,7 +121,7 @@ namespace App.e_Ticaret.Controllers
         {
             var userId = GetUserId() ?? -1;
 
-            return await _dbContext.CartItems
+            return await _ciRepo.GetAll()
                 .Include(ci => ci.Product.Images)
                 .Where(ci => ci.UserId == userId)
                 .Select(ci => new CartItemViewModel

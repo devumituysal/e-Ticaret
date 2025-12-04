@@ -1,4 +1,7 @@
 ﻿using App.Data.Contexts;
+using App.Data.Entities;
+using App.Data.Repositories.Implementations;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +10,17 @@ namespace App.e_Ticaret.Controllers
 {
     public class ProfileController : BaseController
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<UserEntity> _usRepo;
+        private readonly IDataRepository<OrderEntity> _orRepo;
+        private readonly IDataRepository<ProductEntity> _prRepo;
 
-        public ProfileController(ApplicationDbContext dbContext)
+        public ProfileController(IDataRepository<UserEntity> usRepo,
+        IDataRepository<OrderEntity> orRepo,
+        IDataRepository<ProductEntity> prRepo)
         {
-            _dbContext = dbContext;
+            _usRepo = usRepo;
+            _orRepo = orRepo;
+            _prRepo = prRepo;
         }
 
         [Route("/profile")]
@@ -25,14 +34,13 @@ namespace App.e_Ticaret.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var userViewModel = await _dbContext.Users
+            var userViewModel = await _usRepo.GetAll()
                 .Where(u => u.Id == userId.Value)
                 .Select(u => new ProfileDetailsViewModel
                 {
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Email = u.Email,
-
                 })
                 .FirstOrDefaultAsync();
 
@@ -80,7 +88,7 @@ namespace App.e_Ticaret.Controllers
                 user.Password = editMyProfileModel.Password;
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _usRepo.UpdateAsync(user);
 
             TempData["SuccessMessage"] = "Profiliniz başarıyla güncellendi.";
 
@@ -98,7 +106,7 @@ namespace App.e_Ticaret.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            List<OrderViewModel> orders = await _dbContext.Orders
+            List<OrderViewModel> orders = await _orRepo.GetAll()
                 .Where(o => o.UserId == userId.Value)
                 .Select(o => new OrderViewModel
                 {
@@ -131,7 +139,7 @@ namespace App.e_Ticaret.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            List<MyProductsViewModel> products = await _dbContext.Products
+            List<MyProductsViewModel> products = await _prRepo.GetAll()
                 .Where(p => p.SellerId == userId.Value)
                 .Select(p => new MyProductsViewModel
                 {

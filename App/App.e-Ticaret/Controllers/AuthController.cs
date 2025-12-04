@@ -1,5 +1,6 @@
 ﻿using App.Data.Contexts;
 using App.Data.Entities;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +9,11 @@ namespace App.e_Ticaret.Controllers
 {
     public class AuthController : BaseController
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<UserEntity> _repo;
 
-        public AuthController(ApplicationDbContext dbContext)
+        public AuthController(IDataRepository<UserEntity> repo)
         {
-            _dbContext=dbContext;   
+            _repo=repo;   
         }
 
         [Route("/register")]
@@ -40,8 +41,7 @@ namespace App.e_Ticaret.Controllers
                 CreatedAt = DateTime.UtcNow,
             };
 
-            _dbContext.Users.Add(user);
-            await _dbContext.SaveChangesAsync();
+            await _repo.AddAsync(user);
 
             ViewBag.SuccessMessage = "Kayıt işlemi başarılı. Giriş yapabilirsiniz.";
             ModelState.Clear();
@@ -63,7 +63,9 @@ namespace App.e_Ticaret.Controllers
                 return View(loginModel);
             }
 
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == loginModel.Email && u.Password == loginModel.Password);
+            var user = await _repo.GetAll()
+                .Include(u=>u.Role)
+                .FirstOrDefaultAsync(u => u.Email == loginModel.Email && u.Password == loginModel.Password);
 
             if (user == null)
             {
@@ -107,7 +109,7 @@ namespace App.e_Ticaret.Controllers
                 return View(forgotPasswordMailModel);
             }
 
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == forgotPasswordMailModel.Email);
+            var user = await _repo.GetAll().FirstOrDefaultAsync(u => u.Email == forgotPasswordMailModel.Email);
 
             if (user == null)
             {

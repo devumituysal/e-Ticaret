@@ -1,5 +1,6 @@
 ﻿using App.Data.Contexts;
 using App.Data.Entities;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Controllers;
 using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +10,13 @@ namespace App.Eticaret.Controllers
 {
     public class CartController : BaseController
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<ProductEntity> _productRepo;
+        private readonly IDataRepository<CartItemEntity> _ciRepo;
 
-        public CartController(ApplicationDbContext dbContext)
+        public CartController(IDataRepository<ProductEntity> productRepo, IDataRepository<CartItemEntity> ciRepo)
         {
-            _dbContext = dbContext;
+            _productRepo = productRepo;
+            _ciRepo = ciRepo;
         }
 
         [Route("/add-to-cart/{productId:int}")]
@@ -27,12 +30,12 @@ namespace App.Eticaret.Controllers
                 return RedirectToAction(nameof(AuthController.Login), "Auth");
             }
 
-            if (!await _dbContext.Products.AnyAsync(p => p.Id == productId))
+            if (!await _productRepo.GetAll().AnyAsync(p => p.Id == productId))
             {
                 return NotFound();
             }
 
-            var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
+            var cartItem = await _ciRepo.GetAll().FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
 
             if (cartItem is not null)
             {
@@ -48,10 +51,9 @@ namespace App.Eticaret.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                _dbContext.CartItems.Add(cartItem);
+                await _ciRepo.AddAsync(cartItem);
             }
 
-            await _dbContext.SaveChangesAsync();
 
             var prevUrl = Request.Headers.Referer.FirstOrDefault();
 
@@ -88,15 +90,15 @@ namespace App.Eticaret.Controllers
                 return RedirectToAction(nameof(AuthController.Login), "Auth");
             }
 
-            var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.Id == cartItemId);
+            var cartItem = await _ciRepo.GetAll().FirstOrDefaultAsync(ci => ci.UserId == userId && ci.Id == cartItemId);
 
             if (cartItem is null)
             {
                 return NotFound();
             }
 
-            _dbContext.CartItems.Remove(cartItem);
-            await _dbContext.SaveChangesAsync();
+            await _ciRepo.DeleteAsync(cartItemId);
+
 
             return RedirectToAction(nameof(Edit));
         }
@@ -111,7 +113,7 @@ namespace App.Eticaret.Controllers
                 return RedirectToAction(nameof(AuthController.Login), "Auth");
             }
 
-            var cartItem = await _dbContext.CartItems
+            var cartItem = await _ciRepo.GetAll()
                 .Include(ci => ci.Product.Images)
                 .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.Id == cartItemId);
 
@@ -121,7 +123,7 @@ namespace App.Eticaret.Controllers
             }
 
             cartItem.Quantity = quantity;
-            await _dbContext.SaveChangesAsync();
+            cartItem = await _ciRepo.UpdateAsync(cartItem)!;
 
             var model = new CartItemViewModel
             {
@@ -154,7 +156,7 @@ namespace App.Eticaret.Controllers
         {
             var userId = GetUserId() ?? -1;
 
-            return await _dbContext.CartItems
+            return await _ciRepo.GetAll()
                 .Include(ci => ci.Product.Images)
                 .Where(ci => ci.UserId == userId)
                 .Select(ci => new CartItemViewModel

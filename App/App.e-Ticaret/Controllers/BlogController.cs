@@ -1,15 +1,17 @@
 ﻿using App.Data.Contexts;
+using App.Data.Entities;
+using App.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.e_Ticaret.Controllers
 {
     public class BlogController : Controller
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<BlogEntity> _repo;
 
-        public BlogController(ApplicationDbContext dbContext)
+        public BlogController(IDataRepository<BlogEntity> repo)
         {
-            _dbContext=dbContext;
+            _repo= repo;
         }
 
         [HttpGet("blog")]

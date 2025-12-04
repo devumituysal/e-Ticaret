@@ -1,10 +1,14 @@
 using App.Data.Contexts;
+using App.Data.Repositories.Implementations;
+using App.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
 

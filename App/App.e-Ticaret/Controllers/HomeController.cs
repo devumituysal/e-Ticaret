@@ -1,6 +1,8 @@
 using App.Data.Contexts;
 using App.Data.Entities;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Models.ViewModels;
+using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -9,11 +11,13 @@ namespace App.e_Ticaret.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<ProductEntity> _prRepo;
+        private readonly IDataRepository<ContactFormEntity> _cfRepo;
 
-        public HomeController(ApplicationDbContext dbContext)
+        public HomeController(IDataRepository<ProductEntity> prRepo, IDataRepository<ContactFormEntity> cfRepo)
         {
-            _dbContext=dbContext;
+            _prRepo = prRepo;
+            _cfRepo = cfRepo;
         }
 
         public IActionResult Index()  //  anasayfa
@@ -50,8 +54,7 @@ namespace App.e_Ticaret.Controllers
                 SeenAt = null
             };
 
-            _dbContext.ContactForms.Add(contactMessageEntity);
-            await _dbContext.SaveChangesAsync();
+            await _cfRepo.AddAsync(contactMessageEntity);
 
             ViewBag.SuccessMessage = "Your message has been sent successfully.";
 
@@ -61,7 +64,7 @@ namespace App.e_Ticaret.Controllers
         [HttpGet]
         public async Task<IActionResult> Listing()  // ürünler sayfasýný açar
         {
-            var products = await _dbContext.Products
+            var products = await _prRepo.GetAll()
                 .Where(p => p.Enabled)
                 .Select(p => new ProductListingViewModel
                 {
@@ -80,7 +83,7 @@ namespace App.e_Ticaret.Controllers
         [HttpGet]
         public async Task<IActionResult> ProductDetailAsync([FromRoute] int productId) // bir ürünün üzerindeki buton ile çalýþýr ve detaylarýný gösterir
         {
-            var product = await _dbContext.Products
+            var product = await _prRepo.GetAll()
                 .Where(p => p.Enabled && p.Id == productId)
                 .Select(p => new HomeProductDetailViewModel
                 {

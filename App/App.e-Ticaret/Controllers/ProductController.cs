@@ -1,5 +1,7 @@
 ﻿using App.Data.Contexts;
 using App.Data.Entities;
+using App.Data.Repositories.Implementations;
+using App.Data.Repositories.Interfaces;
 using App.e_Ticaret.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,26 +11,25 @@ namespace App.e_Ticaret.Controllers
 {
     public class ProductController : BaseController
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IDataRepository<ProductEntity> _prRepo;
+        private readonly IDataRepository<ProductImageEntity> _priRepo;
+        private readonly IDataRepository<ProductCommentEntity> _prcRepo;
 
-        public ProductController(ApplicationDbContext dbContext)
+        public ProductController(IDataRepository<ProductEntity> prRepo,
+        IDataRepository<ProductImageEntity> priRepo,
+        IDataRepository<ProductCommentEntity> prcRepo)
         {
-            _dbContext = dbContext;
+            _prRepo = prRepo;
+            _priRepo = priRepo;
+            _prcRepo = prcRepo;
+
         }
 
 
         [Route("/product")]
         [HttpGet]
-        public async Task<IActionResult> Create() // yeni bir ürün ekleme formunu açar ( muhtemel senaryo sadece satıcılar için)
+        public  IActionResult Create() // yeni bir ürün ekleme formunu açar ( muhtemel senaryo sadece satıcılar için)
         {
-            ViewBag.Discounts = await _dbContext.ProductDiscounts
-                .Where(d=>d.Enabled)
-                .Select(d=> new DiscountSelectItemViewModel { Id = d.Id, Rate = d.DiscountRate })
-                .ToListAsync();
-
-            ViewBag.Categories = await _dbContext.Categories
-                .Select(d => new CategorySelectItemViewModel { Id = d.Id , Name = d.Name})
-                .ToListAsync();
             return View();
         }
 
@@ -36,14 +37,6 @@ namespace App.e_Ticaret.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] EditProductViewModel newProductModel) // form doldurularak yeni ürün ekleme işini yapar
         {
-            ViewBag.Discounts = await _dbContext.ProductDiscounts
-                 .Where(d => d.Enabled)
-                 .Select(d => new DiscountSelectItemViewModel { Id = d.Id, Rate = d.DiscountRate })
-                 .ToListAsync();
-
-            ViewBag.Categories = await _dbContext.Categories
-                .Select(c => new CategorySelectItemViewModel { Id = c.Id, Name = c.Name })
-                .ToListAsync();
 
             if (!ModelState.IsValid)
             {
@@ -63,8 +56,7 @@ namespace App.e_Ticaret.Controllers
 
             };
 
-            _dbContext.Products.Add(productEntity);
-            await _dbContext.SaveChangesAsync();
+            productEntity = await _prRepo.AddAsync(productEntity);
 
             await SaveProductImages(productEntity.Id, newProductModel.Images);
 
@@ -86,8 +78,7 @@ namespace App.e_Ticaret.Controllers
                     Url = $"/uploads/{Guid.NewGuid()}{Path.GetExtension(image.FileName)}"
                 };
 
-                _dbContext.ProductImages.Add(productImageEntity);
-                await _dbContext.SaveChangesAsync();
+                productImageEntity = await _priRepo.AddAsync(productImageEntity);
 
                 await using var fileStream = new FileStream($"wwwroot{productImageEntity.Url}", FileMode.Create);
                 await image.CopyToAsync(fileStream);
@@ -98,7 +89,8 @@ namespace App.e_Ticaret.Controllers
         [HttpGet]
         public async Task<IActionResult> EditAsync([FromRoute] int productId, [FromForm] EditProductViewModel editProductModel) // mevcut ürün üzerindeki buton ile edit sayfasını açar ( yada ürün detayları)
         {
-            var productEntity = await _dbContext.Products.FindAsync(productId);
+            var productEntity = await _prRepo.GetByIdAsync(productId);
+
             if (productEntity is null)
             {
                 return NotFound();
@@ -126,7 +118,7 @@ namespace App.e_Ticaret.Controllers
                 return View(editProductModel);
             }
 
-            var productEntity = await _dbContext.Products.FindAsync(productId);
+            var productEntity = await _prRepo.GetByIdAsync(productId);
 
             if (productEntity is null)
             {
@@ -140,7 +132,7 @@ namespace App.e_Ticaret.Controllers
             productEntity.Details = editProductModel.Description;
             productEntity.StockAmount = editProductModel.StockAmount;
 
-            await _dbContext.SaveChangesAsync();
+            await _prRepo.UpdateAsync(productEntity);
 
             ViewBag.SuccessMessage = "Ürün başarıyla güncellendi.";
 
@@ -151,14 +143,19 @@ namespace App.e_Ticaret.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete([FromRoute] int productId) // mevcut ürün üzerindeki buton ile ürünü silme işi yapılır
         {
-            var productEntity = await _dbContext.Products.FindAsync(productId);
-            if (productEntity is null)
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!await _prRepo.GetAll().AnyAsync(x => x.Id == productId && x.SellerId == userId))
             {
                 return NotFound();
             }
 
-            _dbContext.Products.Remove(productEntity);
-            await _dbContext.SaveChangesAsync();
+            await _prRepo.DeleteAsync(productId);
 
             ViewBag.SuccessMessage = "Ürün başarıyla silindi.";
 
@@ -181,12 +178,12 @@ namespace App.e_Ticaret.Controllers
                 return BadRequest();
             }
 
-            if (!await _dbContext.Products.AnyAsync(x => x.Id == productId))
+            if (!await _prRepo.GetAll().AnyAsync(x => x.Id == productId))
             {
                 return NotFound();
             }
 
-            if (await _dbContext.ProductComments.AnyAsync(x => x.ProductId == productId && x.UserId == userId))
+            if (await _prcRepo.GetAll().AnyAsync(x => x.ProductId == productId && x.UserId == userId))
             {
                 return BadRequest();
             }
@@ -200,8 +197,7 @@ namespace App.e_Ticaret.Controllers
                 CreatedAt = DateTime.UtcNow,
             };
 
-            _dbContext.ProductComments.Add(productCommentEntity);
-            await _dbContext.SaveChangesAsync();
+            await _prcRepo.AddAsync(productCommentEntity);
 
             return Ok();
         }
